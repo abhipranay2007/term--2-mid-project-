@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body{
+            background-color:darkyellow;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+            margin:0;
+        }
+        .container{
+            background-color:paleyellow;
+            padding:2rem;
+            border-radius:10px;
+            text-align:center;
+            width:300px;
+        }
+        h1{
+            color:orange;
+            margin-bottom:1.5rem;
+        }
+        .input{
+            margin-bottom:1.5rem;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        .input-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 45%;
+        }
+        label{
+            display:block;
+            margin-bottom:0.5rem;
+            color:#666;
+        }
+        input[type="number"]{
+            padding:10px;
+            font-size:16px;
+            width:100%; 
+            box-sizing: border-box;
+            border:2px solid yellow;
+            border-radius:5px;
+            text-align:center;
+        }
+        button{
+            background-color:lightblue;
+            color:white;
+            border:none;
+            padding:12px 24px;
+            font-size:16px;
+            border-radius:5px;
+            cursor:pointer;
+            transition:background-color 0.2s;
+            width:100%;
+        }
+        button:hover{
+            background-color:red;
+        }
+        #timer-display{
+            font-size:4rem;
+            font-weight:bold;
+            color:pink;
+            margin:1.5rem 0;
+        }
+        .status{
+            font-size:0.9rem;
+            color:#888;
+            margin-top:1rem;
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Study Timer</h1>
+        <div class="input-group">
+            <div class="input-wrapper">
+                <label for="minutesInput">Minutes</label>
+                <input type="number" id="minutesInput" placeholder="0" min="0" value="0">
+            </div>
+            <div class="input-wrapper">
+                <label for="secondsInput">Seconds</label>
+                <input type="number" id="secondsInput" placeholder="0" min="0" value="0">
+            </div>
+        </div>
+        <div id="timer-display">00:00</div>
+        <button onclick="startTimer()">Start Countdown</button>
+        <p class="status" id="status-text">Ready to start</p>
+    </div>
+    <script>
+        let countdown;
+        const beepSound = new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"); 
+        function playBeep(){
+            const context= new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator =context.createOscillator();
+            const gainNode =context.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(context.destination)
+            oscillator.type ="sine";
+            oscillator.frequency.value=880; 
+            gainNode.gain.value =0.1; 
+            oscillator.start();
+            setTimeout(()=>oscillator.stop(),500)
+        }
+        function requestPerms(){
+            if("Notification"in window){
+            Notification.requestPermission();
+            }
+        }
+        document.body.addEventListener('click',requestPerms,{once:true});
+        function formatTime(totalSeconds) {
+            const m = Math.floor(totalSeconds / 60)
+            const s = totalSeconds % 60;
+            return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+        function startTimer(){
+            const minInput = document.getElementById('minutesInput');
+            const secInput = document.getElementById('secondsInput');
+            const minutes = parseInt(minInput.value) || 0;
+            const seconds = parseInt(secInput.value) || 0
+            let timeLeft = (minutes * 60) + seconds;
+            const display = document.getElementById('timer-display');
+            const status = document.getElementById('status-text');
+            if(timeLeft <= 0) {
+                alert("Please enter a valid time!");
+                return;
+            }
+            clearInterval(countdown);
+            display.textContent = formatTime(timeLeft);
+            status.textContent = "Timer is running..."
+            minInput.disabled = true;
+            secInput.disabled = true;
+
+            countdown = setInterval(()=>{
+                timeLeft--; 
+                display.textContent = formatTime(timeLeft);
+                if (timeLeft <= 0){
+                    clearInterval(countdown)
+                    timerFinished()
+                }
+            } ,1000);
+        }
+        function timerFinished(){
+            const display = document.getElementById('timer-display');
+            const status = document.getElementById('status-text');
+            const minInput = document.getElementById('minutesInput')
+            const secInput = document.getElementById('secondsInput')
+            display.textContent = "00:00";
+            status.textContent = "Time's up"
+            minInput.disabled = false;
+            secInput.disabled = false
+            
+            playBeep();
+            if (Notification.permission=== "granted"){
+                new Notification("Timer FinishedFinished😱",{
+                    body:"Your countdown has ended",
+                      icon:"https://cdn-icons-png.flaticon.com/512/2055/2055566.png"
+                });
+            } else if(Notification.permission !=="denied"){
+                Notification.requestPermission().then(permission=>
+                {
+                    if (permission==="granted"){
+                    new Notification("Timer Finished😱")
+                    }
+                })
+            }
+        }
+    </script>
+</body>
+</html>
