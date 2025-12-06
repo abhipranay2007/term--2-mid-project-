@@ -100,7 +100,7 @@
         let countdown;
         const beepSound = new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"); 
         function playBeep(){
-            const context= new (window.AudioContext || window.webkitAudioContext)();
+            const context= new (window.AudioContext ||window.webkitAudioContext)();
             const oscillator =context.createOscillator();
             const gainNode =context.createGain();
             oscillator.connect(gainNode);
@@ -130,7 +130,7 @@
             let timeLeft = (minutes * 60) + seconds;
             const display = document.getElementById('timer-display');
             const status = document.getElementById('status-text');
-            if(timeLeft <= 0) {
+            if(timeLeft <= 0){
                 alert("Please enter a valid time!");
                 return;
             }
@@ -166,11 +166,10 @@
                       icon:"https://cdn-icons-png.flaticon.com/512/2055/2055566.png"
                 });
             } else if(Notification.permission !=="denied"){
-                Notification.requestPermission().then(permission=>
-                {
+                Notification.requestPermission().then(permission=>{
                     if (permission==="granted"){
                     new Notification("Timer Finished😱")
-                    }
+            }
                 })
             }
         }
